@@ -16,6 +16,8 @@ class Database:
         self.table_tickers = {
             'nasdaq': '^IXIC',
             'vix': '^VIX',
+            'nasdaqFut': 'NQ=F',
+            'krw': 'KRW=X'
         }
         self._init_db()
 
