@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import re
 
-from core.config import CONFIG
+from nasdaq.core.config import CONFIG
 
 
 class Database:

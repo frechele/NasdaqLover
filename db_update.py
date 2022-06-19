@@ -4,7 +4,7 @@ import pandas_datareader as pdr
 import pandas as pd
 import logging
 
-from core.config import CONFIG
+from nasdaq.core.config import CONFIG
 
 
 class DBUpdater:
