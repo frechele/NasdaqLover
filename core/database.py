@@ -1,8 +1,7 @@
 import psycopg2 as pg2
-import yfinance
-import pandas_datareader as pdr
 import pandas as pd
-import logging
+from datetime import datetime, timedelta
+import re
 
 from core.config import CONFIG
 
@@ -13,78 +12,42 @@ class Database:
         self.conn = pg2.connect(host=self.config['host'], port=self.config['port'], database='nasdaq',
                                 user=self.config['user'], password=self.config['passwd'])
 
-        self.table_tickers = {
-            'nasdaq': '^IXIC',
-            'vix': '^VIX',
-            'nasdaqFut': 'NQ=F',
-            'krw': 'KRW=X'
-        }
-        self._init_db()
+    @property
+    def table_names(self):
+        return ['nasdaq', 'vix', 'nasdaqFut', 'krw']
+
+    def get_daily_price(self, table, start_date=None, end_date=None):
+        start_date, end_date = self._date_convert(start_date, end_date)
+        sql = f"SELECT * FROM {table} WHERE date >= '{start_date}' AND date <= '{end_date}'"
+        df = pd.read_sql(sql, self.conn)
+        df.index = df['date']
+        return df
 
     def __del__(self):
         self.conn.close()
 
-    def update_tables(self):
-        for table_name, ticker in self.table_tickers.items():
-            self.update_table(table_name, ticker)
-
-    def update_table(self, table_name: str, ticker: str):
-        with self.conn.cursor() as curs:
-            sql = f'''
-            SELECT MAX(date) FROM {table_name};
-            '''
-            curs.execute(sql)
-            start_date = curs.fetchone()[0]
-
-            if start_date is None:
-                start_date = '1900-01-01'
-
-            logging.info(f'update table {table_name} after {start_date}')
-            df = Database.get_data_from_yahoo(ticker, start_date)
-            sql = f'INSERT INTO {table_name} VALUES '
-            for i, r in enumerate(df.itertuples()):
-                if i > 0:
-                    sql += ', '
-                sql += f"( '{r.Date}', '{r.Open}', '{r.High}', '{r.Low}', '{r.Close}' )"
-            sql += ' ON CONFLICT (date) DO NOTHING'
-
-            curs.execute(sql)
-            self.conn.commit()
-
     @staticmethod
-    def get_data_from_yahoo(ticker: str, start: str) -> pd.DataFrame:
-        df = pdr.get_data_yahoo(ticker, start=start)[
-            ['High', 'Low', 'Open', 'Close']]
-        df = df.reset_index(level='Date')
-        return df
+    def _date_convert(end_date, start_date=None, time_delta: int=365):
+        if start_date is None:
+            start_date = datetime.today() - timedelta(days=time_delta)
+            start_date = start_date.strftime('%Y-%m-%d')
+        else:
+            start_lst = re.split('\D+', start_date)
+            if len(start_lst[0]) == 0:
+                start_lst = start_lst[1:]
+            
+            start_year, start_month, start_day = map(int, start_lst)
+            start_date = f'{start_year:04d}-{start_month:02d}-{start_day:02d}'
 
-    def _init_db(self):
-        with self.conn.cursor() as curs:
-            for table_name in self.table_tickers:
-                sql = f'''
-                CREATE TABLE IF NOT EXISTS {table_name} (
-                    date DATE,
-                    open FLOAT,
-                    high FLOAT,
-                    low FLOAT,
-                    close FLOAT,
-                    PRIMARY KEY (date)
-                );
-                '''
-                curs.execute(sql)
+        if end_date is None:
+            end_date = datetime.today()
+            end_date = end_date.strftime('%Y-%m-%d')
+        else:
+            end_lst = re.split('\D+', end_date)
+            if len(end_lst[0]) == 0:
+                end_lst = end_lst[1:]
+            
+            end_year, end_month, end_day = map(int, end_lst)
+            end_date = f'{end_year:04d}-{end_month:02d}-{end_day:02d}'
 
-
-if __name__ == '__main__':
-    db = Database()
-
-    logger = logging.getLogger()
-
-    logger.setLevel(logging.INFO)
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-    stream_handler = logging.StreamHandler()
-    stream_handler.setFormatter(formatter)
-    logger.addHandler(stream_handler)
-
-    db.update_tables()
+        return start_date, end_date
