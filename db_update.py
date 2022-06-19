@@ -17,7 +17,8 @@ class DBUpdater:
             'nasdaq': '^IXIC',
             'vix': '^VIX',
             'nasdaqFut': 'NQ=F',
-            'krw': 'KRW=X'
+            'krw': 'KRW=X',
+            'wti': 'CL=F',
         }
         self._init_db()
 

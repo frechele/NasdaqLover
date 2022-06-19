@@ -14,7 +14,7 @@ class Database:
 
     @property
     def table_names(self):
-        return ['nasdaq', 'vix', 'nasdaqFut', 'krw']
+        return ['nasdaq', 'nasdaqFut', 'vix', 'krw', 'wti']
 
     def get_daily_price(self, table, start_date=None, end_date=None):
         start_date, end_date = self._date_convert(start_date, end_date)

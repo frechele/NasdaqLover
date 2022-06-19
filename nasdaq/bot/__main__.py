@@ -14,7 +14,8 @@ class Bot:
             'nasdaq': '나스닥',
             'nasdaqFut': '나스닥(선물)',
             'vix': 'VIX 지수',
-            'krw': '원화 환율'
+            'krw': '원화 환율',
+            'wti': 'WTI 선물',
         }
 
     def __call__(self):
