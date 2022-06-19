@@ -27,9 +27,9 @@ class Database:
         self.conn.close()
 
     @staticmethod
-    def _date_convert(end_date, start_date=None, time_delta: int=365):
+    def _date_convert(start_date, end_date):
         if start_date is None:
-            start_date = datetime.today() - timedelta(days=time_delta)
+            start_date = datetime.today() - timedelta(days=365)
             start_date = start_date.strftime('%Y-%m-%d')
         else:
             start_lst = re.split('\D+', start_date)
