@@ -92,19 +92,19 @@ class Bot:
                     },
                     {
                         'type': 'mrkdwn',
-                        'text': f'시가: {today_open:.2f} ({today_open_return:.2f}%)'
+                        'text': f'시가: {today_open:.2f} ({today_open_return:+.2f}%)'
                     },
                     {
                         'type': 'mrkdwn',
-                        'text': f'고가: {today_high:.2f} ({today_high_return:.2f}%)'
+                        'text': f'고가: {today_high:.2f} ({today_high_return:+.2f}%)'
                     },
                     {
                         'type': 'mrkdwn',
-                        'text': f'저가: {today_low:.2f} ({today_low_return:.2f}%)'
+                        'text': f'저가: {today_low:.2f} ({today_low_return:+.2f}%)'
                     },
                     {
                         'type': 'mrkdwn',
-                        'text': f'종가: {today_close:.2f} ({today_close_return:.2f}%)'
+                        'text': f'종가: {today_close:.2f} ({today_close_return:+.2f}%)'
                     }
                 ]
             })
