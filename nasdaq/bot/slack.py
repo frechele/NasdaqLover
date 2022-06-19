@@ -9,17 +9,9 @@ class SlackAPI:
 
         self.client = WebClient(self.config['token'])
 
-    def send_message(self, message: str):
+    def send_message(self, blocks):
         self.client.chat_postMessage(channel='stock-bot',
-            blocks=[
-                {
-                    'type': 'section',
-                    'text': {
-                        'type': 'mrkdwn',
-                        'text': '답이 없는 장세입니다. 존버하세요.'
-                    }
-                }
-            ],
+            blocks=blocks,
             text='StockBot alert'
         )
 
