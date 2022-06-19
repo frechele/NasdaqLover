@@ -14,7 +14,3 @@ class SlackAPI:
             blocks=blocks,
             text='StockBot alert'
         )
-
-if __name__ == '__main__':
-    api = SlackAPI()
-    api.send_message('asdf')
