@@ -1,5 +1,7 @@
-from nasdaq.bot.slack import SlackAPI
+from datetime import datetime
+import pandas_market_calendars as mcal
 
+from nasdaq.bot.slack import SlackAPI
 from nasdaq.core.database import Database
 
 
@@ -14,6 +16,41 @@ class Bot:
             'vix': 'VIX 지수',
             'krw': '원화 환율'
         }
+
+    def __call__(self):
+        if not self.market_open_check():
+            self.alert_holiday()
+            return
+
+        self.review_previous_market()
+
+
+    def market_open_check(self) -> bool:
+        nasdaq = mcal.get_calendar('NASDAQ')
+        today = datetime.today().strftime('%Y-%m-%d')
+
+        return len(nasdaq.schedule(start_date=today, end_date=today)) != 0
+
+
+    def alert_holiday(self):
+        blocks = [
+            {
+                'type': 'header',
+                'text': {
+                    'type': 'plain_text',
+                    'text': '휴장 알림'
+                }
+            },
+            {
+                'type': 'section',
+                'text': {
+                    'type': 'plain_text',
+                    'text': '금일은 미국 증시 휴장일입니다.'
+                }
+            }
+        ]
+        self.api.send_message(blocks)
+
 
     def review_previous_market(self):
         blocks = []
@@ -76,5 +113,4 @@ class Bot:
 
 if __name__ == '__main__':
     bot = Bot()
-
-    bot.review_previous_market()
+    bot()
